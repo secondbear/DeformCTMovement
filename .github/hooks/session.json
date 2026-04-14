@@ -1,0 +1,20 @@
+{
+  "hooks": {
+    "SessionStart": [
+      {
+        "type": "command",
+        "command": "echo {\"systemMessage\": \"DeformCTMovement context loaded. Phase status: Phase 1-5 not started. See plan_deform.md for spec. Key rules: LPS coords, inverse DVF mapping, HU clamp [-1024,3071], no patient data in tests, SimpleITK>=2.3.\"}",
+        "windows": "cmd /c echo {\"systemMessage\": \"DeformCTMovement context loaded. Read plan_deform.md and AGENTS.md before implementing any phase.\"}",
+        "timeout": 5
+      }
+    ],
+    "PreToolUse": [
+      {
+        "type": "command",
+        "command": "echo {}",
+        "windows": "cmd /c echo {}",
+        "timeout": 5
+      }
+    ]
+  }
+}
