@@ -1,0 +1,26 @@
+[build-system]
+requires = ["setuptools >= 68.0", "wheel"]
+build-backend = "setuptools.backends._legacy:_Backend"
+
+[project]
+name = "gendosecalc-deform"
+version = "0.1.0"
+description = "Anatomically plausible deformable CT generation for motion-resolved radiotherapy dose calculation"
+requires-python = ">= 3.11"
+dependencies = [
+    "SimpleITK >= 2.3",
+    "numpy >= 1.24",
+    "scipy >= 1.10",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest >= 7.0",
+]
+
+[tool.setuptools.packages.find]
+include = ["gendosecalc*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+tmp_path_retention_policy = "none"

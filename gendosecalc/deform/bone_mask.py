@@ -1,0 +1,67 @@
+"""Bone segmentation and tissue weight map via HU thresholding.
+
+Strategy:
+    1. Threshold CT at ``bone_threshold_hu`` → binary bone mask
+    2. Gaussian-smooth the mask with per-axis sigma = ``transition_width_mm / spacing_mm``
+    3. Invert to get tissue weight: ``1.0 − smoothed`` (0 in bone, 1 in soft tissue)
+
+The tissue weight is used to attenuate DVF displacements so bone remains rigid.
+"""
+
+from __future__ import annotations
+
+import numpy as np
+from scipy.ndimage import gaussian_filter
+
+from gendosecalc.deform.models import DeformationConfig
+
+
+def compute_bone_mask(
+    ct_array: np.ndarray,
+    config: DeformationConfig | None = None,
+) -> np.ndarray:
+    """Segment bone from a CT volume by HU thresholding.
+
+    Parameters:
+        ct_array: HU volume, shape ``(nz, ny, nx)``.
+        config: Deformation configuration (uses ``bone_threshold_hu``).
+            Defaults to ``DeformationConfig()`` if not provided.
+
+    Returns:
+        Boolean array ``(nz, ny, nx)`` — True where HU > threshold.
+    """
+    if config is None:
+        config = DeformationConfig()
+    return ct_array > config.bone_threshold_hu
+
+
+def compute_tissue_weight(
+    bone_mask: np.ndarray,
+    spacing_mm: np.ndarray,
+    config: DeformationConfig | None = None,
+) -> np.ndarray:
+    """Compute a smooth tissue weight map from a bone mask.
+
+    The weight is 1.0 in soft tissue and 0.0 inside bone, with a smooth
+    Gaussian transition at bone–tissue interfaces.
+
+    Parameters:
+        bone_mask: Boolean array ``(nz, ny, nx)`` from ``compute_bone_mask``.
+        spacing_mm: Voxel spacing ``(sz, sy, sx)`` in mm.
+        config: Deformation configuration (uses ``transition_width_mm``).
+
+    Returns:
+        Float32 array ``(nz, ny, nx)`` in ``[0, 1]``.
+    """
+    if config is None:
+        config = DeformationConfig()
+
+    spacing = np.asarray(spacing_mm, dtype=np.float64)
+    # Per-axis sigma in voxel units
+    sigma_voxels = config.transition_width_mm / spacing
+
+    smoothed = gaussian_filter(
+        bone_mask.astype(np.float32), sigma=sigma_voxels, mode="nearest",
+    )
+    weight = 1.0 - smoothed
+    return np.clip(weight, 0.0, 1.0).astype(np.float32)

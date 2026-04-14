@@ -18,9 +18,9 @@ Part of the **GenDoseCalc** ecosystem. The existing pipeline applies prostate mo
 
 | Phase | Description | Status |
 |-------|-------------|--------|
-| Phase 1 | DVF infrastructure (`models`, `sitk_bridge`, `dvf_io`) | **NOT STARTED** |
-| Phase 2 | Bone masking + DVF application (`bone_mask`, `apply_deformation`) | **NOT STARTED** |
-| Phase 3 | DVF generation from motion params (`dvf_generate`) | **NOT STARTED** |
+| Phase 1 | DVF infrastructure (`models`, `sitk_bridge`, `dvf_io`) | **COMPLETE** |
+| Phase 2 | Bone masking + DVF application (`bone_mask`, `apply_deformation`) | **COMPLETE** |
+| Phase 3 | DVF generation from motion params (`dvf_generate`) | **COMPLETE** |
 | Phase 4 | Pipeline integration (`--deform-ct` flag, DICOM export) | **NOT STARTED** |
 | Phase 5 | Validation and refinement | **NOT STARTED** |
 
