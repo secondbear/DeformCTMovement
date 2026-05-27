@@ -48,16 +48,15 @@ def _build_voxel_coords(
 
     Handles non-identity direction cosines via the full affine inverse.
     """
-    # Flip DICOM (x, y, z) → project (z, y, x)
-    pts_zyx = points_xyz_mm[:, ::-1].copy()   # (N, 3)
+    # origin_mm is in project (oz, oy, ox); convert to LPS (ox, oy, oz)
+    origin_lps = origin_mm[::-1]
 
-    # Affine: p = origin + direction @ diag(spacing) @ index
-    # → A = direction @ diag(spacing),   index = A⁻¹ @ (p - origin)
-    A = direction @ np.diag(spacing_mm)        # (3, 3)
-    A_inv = np.linalg.inv(A)                   # (3, 3)
+    # Direction rows are LPS (x,y,z) unit vectors — do NOT flip to ZYX first.
+    # Inverse affine: [iz, iy, ix] = diag(1/spacing) @ direction @ (p_lps - origin_lps)
+    M_inv = np.diag(1.0 / spacing_mm) @ direction   # (3, 3)
 
-    rel = pts_zyx - origin_mm                  # (N, 3)
-    coords = (A_inv @ rel.T)                   # (3, N) — (fz, fy, fx)
+    rel = points_xyz_mm - origin_lps            # (N, 3) in LPS (x, y, z)
+    coords = M_inv @ rel.T                      # (3, N) — (fz, fy, fx)
     return coords
 
 

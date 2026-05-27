@@ -171,6 +171,7 @@ def _get_contour_traces(
     axis: int,
     slice_idx: int,
     visible_names: set[str] | None,
+    line_dash: str = "solid",
 ) -> list[go.Scatter]:
     """Scatter traces for RTSTRUCT contours at the current slice plane.
 
@@ -232,7 +233,7 @@ def _get_contour_traces(
         if xs_all:
             traces.append(go.Scatter(
                 x=xs_all, y=ys_all, mode="lines",
-                line=dict(color=roi["color"], width=1.5),
+                line=dict(color=roi["color"], width=1.5, dash=line_dash),
                 name=roi["name"], showlegend=False, hoverinfo="name",
             ))
     return traces
@@ -244,9 +245,10 @@ def _add_contours(
     axis: int,
     slice_idx: int,
     visible_names: set[str] | None,
+    line_dash: str = "solid",
 ) -> go.Figure:
     """Add contour scatter traces and lock axis ranges to the image bounds."""
-    for tr in _get_contour_traces(rois, axis, slice_idx, visible_names):
+    for tr in _get_contour_traces(rois, axis, slice_idx, visible_names, line_dash=line_dash):
         fig.add_trace(tr)
     if _orig is not None:
         nz, ny, nx = _orig.shape
@@ -679,17 +681,31 @@ def build_app(
             f"Difference ±{diff_range:.0f} HU  [{ax_label}]",
             row_spacing_mm=row_mm, col_spacing_mm=col_mm,
         )
-        if show_roi and def_rois:
-            _add_contours(fig_diff, def_rois, axis, slice_idx, vis_names)
+        if show_roi:
+            # Difference view: original ROI = solid, deformed ROI = dashed
+            if _orig_rtstruct_rois:
+                _add_contours(fig_diff, _orig_rtstruct_rois, axis, slice_idx, vis_names,
+                              line_dash="solid")
+            if def_rois and def_rois is not _orig_rtstruct_rois:
+                _add_contours(fig_diff, def_rois, axis, slice_idx, vis_names,
+                              line_dash="dash")
 
         # ── Provenance info box ────────────────────────────────────────────
         entry  = next((s for s in _manifest_states if s.get("ct_dir") == state_key), {})
-        tx     = entry.get("tx", 0.0);  ty = entry.get("ty", 0.0); tz = entry.get("tz", 0.0)
-        rx     = entry.get("rx", 0.0);  ry = entry.get("ry", 0.0); rz = entry.get("rz", 0.0)
+        tx     = entry.get("tx_mm", entry.get("tx", 0.0))
+        ty     = entry.get("ty_mm", entry.get("ty", 0.0))
+        tz     = entry.get("tz_mm", entry.get("tz", 0.0))
+        rx     = entry.get("rx_deg", entry.get("rx", 0.0))
+        ry     = entry.get("ry_deg", entry.get("ry", 0.0))
+        rz     = entry.get("rz_deg", entry.get("rz", 0.0))
         wt     = entry.get("cluster_weight", "—")
         ts     = entry.get("iso_timestamp", "")[:19]
+        mean_d = entry.get("cluster_mean_dist_mm")
+        p95_d  = entry.get("cluster_p95_dist_mm")
         abs_dh = np.abs(diff_hu)
 
+        qa_line = (f"Cluster dist mean={mean_d:.2f} p95={p95_d:.2f} mm"
+                   if mean_d is not None else "")
         info = (
             f"State {entry.get('state_index', '?')}  [{ts}]\n"
             f"\n"
@@ -697,7 +713,7 @@ def build_app(
             f"  x: {tx:+.2f}  y: {ty:+.2f}  z: {tz:+.2f}\n"
             f"Rotation (°)\n"
             f"  rx:{rx:+.2f}  ry:{ry:+.2f}  rz:{rz:+.2f}\n"
-            f"Cluster weight: {wt}\n"
+            f"Cluster weight: {wt}  {qa_line}\n"
             f"\n"
             f"This slice ΔHU stats\n"
             f"  mean |Δ| : {abs_dh.mean():.1f}\n"
