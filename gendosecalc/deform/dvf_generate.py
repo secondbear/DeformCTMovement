@@ -261,7 +261,9 @@ def localized_rigid_to_dvf(
             ])
             dirmat = np.asarray(direction, dtype=np.float64).reshape(3, 3)
             origin = np.asarray(origin_mm, dtype=np.float64)
-            centre_of_rotation_mm = origin + dirmat @ (voxel_centroid * spacing)
+            # Forward transform voxel (z,y,x) → LPS (x,y,z) → flip to (z,y,x)
+            centre_xyz = origin[::-1] + dirmat.T @ (voxel_centroid * spacing)
+            centre_of_rotation_mm = centre_xyz[::-1]
         # else: falls back to image centre inside rigid_to_dvf
 
     # Build full rigid DVF centred on CTV centroid

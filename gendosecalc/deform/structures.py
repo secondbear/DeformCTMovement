@@ -84,16 +84,21 @@ def _lps_to_voxel(
         lps_coords: shape ``(N, 3)`` in LPS (z, y, x) order.
         origin_mm: ``(3,)`` volume origin in LPS (z, y, x).
         spacing_mm: ``(3,)`` voxel spacing in LPS (z, y, x).
-        direction: ``(3, 3)`` direction cosine matrix in (z, y, x) convention.
+        direction: ``(3, 3)`` direction cosine matrix — each row is a LPS
+            (x, y, z) unit vector along increasing (iz, iy, ix).
 
     Returns:
         Continuous voxel indices ``(N, 3)`` in (iz, iy, ix) order.
     """
-    inv_dir = np.linalg.inv(direction)
-    delta = lps_coords - origin_mm  # (N, 3)
-    voxel_coords = (inv_dir @ delta.T).T  # (N, 3)
-    voxel_coords /= spacing_mm  # divide by spacing per axis
-    return voxel_coords
+    # Documented inverse transform (copilot-instructions §RTSTRUCT↔CT):
+    #   M_inv = diag(1/spacing) @ direction   — acts on LPS (x,y,z)
+    #   vox   = (M_inv @ (pts_xyz - origin_xyz).T).T
+    # lps_coords and origin_mm arrive in project (z,y,x) order; flip to (x,y,z).
+    pts_xyz = lps_coords[:, ::-1]                     # (N,3) LPS (x,y,z)
+    origin_xyz = origin_mm[::-1]                      # (3,)  LPS (x,y,z)
+    M_inv = np.diag(1.0 / spacing_mm) @ direction     # (3,3)
+    rel = pts_xyz - origin_xyz                        # (N,3) LPS (x,y,z)
+    return (M_inv @ rel.T).T                          # (N,3) → (iz, iy, ix)
 
 
 # ---------------------------------------------------------------------------
@@ -195,8 +200,10 @@ def load_ctv_mask(
             np.mean(ny_i),
             np.mean(nx_i),
         ])
-        # Scale by spacing and add origin (assuming identity-like direction)
-        centroid_lps = origin + direction @ (voxel_centroid * spacing)
+        # Forward transform voxel (z,y,x) → LPS (x,y,z) → flip back to (z,y,x)
+        # physical_xyz = origin_xyz + direction.T @ (spacing * vox_zyx)
+        centroid_xyz = origin[::-1] + direction.T @ (voxel_centroid * spacing)
+        centroid_lps = centroid_xyz[::-1]             # (x,y,z) → (z,y,x)
     else:
         centroid_lps = origin.copy()
 
