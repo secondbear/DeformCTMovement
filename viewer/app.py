@@ -358,7 +358,9 @@ def build_app(
     # ── State dropdown options ────────────────────────────────────────────────
     state_opts = []
     for s in _manifest_states:
-        tx = s.get("tx", 0.0); ty = s.get("ty", 0.0); tz = s.get("tz", 0.0)
+        tx = s.get("tx_mm", s.get("tx", 0.0))
+        ty = s.get("ty_mm", s.get("ty", 0.0))
+        tz = s.get("tz_mm", s.get("tz", 0.0))
         label = (
             f"State {s['state_index']:03d} · "
             f"({tx:+.1f}, {ty:+.1f}, {tz:+.1f}) mm"

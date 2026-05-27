@@ -147,12 +147,19 @@ class StateSelection:
         assignments: Cluster assignment for every sample, shape ``(N,)``.
         cluster_weights: Number of samples in each cluster, shape ``(k,)``.
         total_cost: Sum of within-cluster distances at convergence.
+        cluster_mean_dist_mm: Mean 6-D feature distance from each medoid to
+            its cluster members, shape ``(k,)``.  Units are mm-equivalent
+            (rotations scaled by ``rotation_weight_mm_per_deg``).
+        cluster_p95_dist_mm: 95th-percentile within-cluster distance,
+            shape ``(k,)``.
     """
 
-    medoid_indices: np.ndarray  # int64 (k,)
-    assignments: np.ndarray     # int64 (N,)
+    medoid_indices: np.ndarray   # int64 (k,)
+    assignments: np.ndarray      # int64 (N,)
     cluster_weights: np.ndarray  # int64 (k,)
     total_cost: float
+    cluster_mean_dist_mm: np.ndarray  # float64 (k,)
+    cluster_p95_dist_mm: np.ndarray   # float64 (k,)
 
 
 # ---------------------------------------------------------------------------
@@ -180,6 +187,8 @@ class EnsembleManifestEntry:
     epoch_ms: int
     iso_timestamp: str
     cluster_weight: int
+    cluster_mean_dist_mm: float
+    cluster_p95_dist_mm: float
     tx: float
     ty: float
     tz: float
@@ -199,6 +208,8 @@ class EnsembleManifestEntry:
             "epoch_ms": self.epoch_ms,
             "iso_timestamp": self.iso_timestamp,
             "cluster_weight": self.cluster_weight,
+            "cluster_mean_dist_mm": round(self.cluster_mean_dist_mm, 4),
+            "cluster_p95_dist_mm": round(self.cluster_p95_dist_mm, 4),
             "tx_mm": self.tx,
             "ty_mm": self.ty,
             "tz_mm": self.tz,

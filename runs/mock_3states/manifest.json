@@ -1,6 +1,6 @@
 {
   "engine_version": "0.1.0",
-  "created_at": "2026-05-27T13:50:12.980505+00:00",
+  "created_at": "2026-05-27T14:03:12.383373+00:00",
   "source_ct_dir": "exampledata/ct_rs_063",
   "source_ct_series_instance_uid": "1.2.246.352.71.2.462050361922.13152930.20250522114657",
   "motion_path": "exampledata/mock_motion_3states.csv",
@@ -30,7 +30,7 @@
       "rz_deg": 0.0,
       "ct_dir": "state_000_ct",
       "dvf_path": "state_000_dvf.mha",
-      "deformed_series_instance_uid": "1.2.826.0.1.3680043.8.498.86747338762664531085619600459153503052",
+      "deformed_series_instance_uid": "1.2.826.0.1.3680043.8.498.70946889544224505446046592096731792029",
       "source_ct_series_instance_uid": "1.2.246.352.71.2.462050361922.13152930.20250522114657",
       "rtstruct_path": "state_000_rs.dcm"
     },
@@ -47,7 +47,7 @@
       "rz_deg": 0.0,
       "ct_dir": "state_001_ct",
       "dvf_path": "state_001_dvf.mha",
-      "deformed_series_instance_uid": "1.2.826.0.1.3680043.8.498.40823847716493711905392474242455316551",
+      "deformed_series_instance_uid": "1.2.826.0.1.3680043.8.498.39828956875052749535429025042582880412",
       "source_ct_series_instance_uid": "1.2.246.352.71.2.462050361922.13152930.20250522114657",
       "rtstruct_path": "state_001_rs.dcm"
     },
@@ -64,7 +64,7 @@
       "rz_deg": 0.0,
       "ct_dir": "state_002_ct",
       "dvf_path": "state_002_dvf.mha",
-      "deformed_series_instance_uid": "1.2.826.0.1.3680043.8.498.90242896860636101094266668880769371570",
+      "deformed_series_instance_uid": "1.2.826.0.1.3680043.8.498.23573275551800700875009010395754756669",
       "source_ct_series_instance_uid": "1.2.246.352.71.2.462050361922.13152930.20250522114657",
       "rtstruct_path": "state_002_rs.dcm"
     }

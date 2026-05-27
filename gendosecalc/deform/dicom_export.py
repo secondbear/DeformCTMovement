@@ -333,7 +333,7 @@ def save_ct_series(
         )
 
         out_path = out_dir / f"CT.{z:04d}.dcm"
-        src_ds.save_as(str(out_path), write_like_original=False)
+        src_ds.save_as(str(out_path), enforce_file_format=True)
 
     logger.info(
         "Saved state %03d DICOM CT series (%d slices) → %s  [UID=%s]",

@@ -212,6 +212,8 @@ def generate_ensemble(
         dx, dy, dz = samples.offsets_mm[med_idx]
         rx, ry, rz = samples.rotations_deg[med_idx]
         cluster_weight = int(selection.cluster_weights[i])
+        cluster_mean_dist = float(selection.cluster_mean_dist_mm[i])
+        cluster_p95_dist = float(selection.cluster_p95_dist_mm[i])
 
         logger.info(
             "State %03d / %03d: ts=%d  t=(%+.2f,%+.2f,%+.2f)mm  "
@@ -289,6 +291,8 @@ def generate_ensemble(
             epoch_ms=epoch_ms,
             iso_timestamp=_epoch_ms_to_iso(epoch_ms),
             cluster_weight=cluster_weight,
+            cluster_mean_dist_mm=cluster_mean_dist,
+            cluster_p95_dist_mm=cluster_p95_dist,
             tx=float(dx),
             ty=float(dy),
             tz=float(dz),

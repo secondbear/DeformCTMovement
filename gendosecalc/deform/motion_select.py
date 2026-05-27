@@ -221,14 +221,27 @@ def select_representative_states(
     # Compute cluster weights (sample counts)
     cluster_weights = np.bincount(assignments, minlength=n_states).astype(np.int64)
 
+    # Per-cluster distance QA: mean and p95 from each medoid to its members
+    cluster_mean_dist = np.zeros(n_states, dtype=np.float64)
+    cluster_p95_dist = np.zeros(n_states, dtype=np.float64)
+    for ci, med in enumerate(medoid_indices):
+        member_mask = assignments == ci
+        if member_mask.sum() > 0:
+            dists = np.linalg.norm(X[member_mask] - X[med], axis=1)
+            cluster_mean_dist[ci] = float(dists.mean())
+            cluster_p95_dist[ci] = float(np.percentile(dists, 95))
+
     logger.info(
         "k-medoids converged: %d states, total cost=%.4f, "
-        "cluster sizes [min=%d, max=%d, mean=%.1f]",
+        "cluster sizes [min=%d, max=%d, mean=%.1f]  "
+        "within-cluster dist mean=%.2f p95=%.2f mm-eq",
         n_states,
         cost,
         int(cluster_weights.min()),
         int(cluster_weights.max()),
         float(cluster_weights.mean()),
+        float(cluster_mean_dist.mean()),
+        float(cluster_p95_dist.mean()),
     )
 
     return StateSelection(
@@ -236,4 +249,6 @@ def select_representative_states(
         assignments=assignments,
         cluster_weights=cluster_weights,
         total_cost=cost,
+        cluster_mean_dist_mm=cluster_mean_dist,
+        cluster_p95_dist_mm=cluster_p95_dist,
     )
