@@ -46,9 +46,8 @@ class TestComputeTissueWeight:
     def test_bone_region_near_zero(self, ct_array, ct_spacing):
         mask = compute_bone_mask(ct_array)
         weight = compute_tissue_weight(mask, ct_spacing)
-        # Inside bone insert (1:5, 1:5, 1:5), weight should be < 1
-        # The small insert + Gaussian blur means weight won't be exactly 0
-        assert weight[2, 2, 2] < 0.6
+        # All actual bone voxels must be exactly 0 regardless of bone thickness
+        assert weight[2, 2, 2] == 0.0
 
     def test_soft_tissue_region_near_one(self, ct_array, ct_spacing):
         mask = compute_bone_mask(ct_array)
@@ -63,12 +62,14 @@ class TestComputeTissueWeight:
         assert weight.max() <= 1.0
 
     def test_smooth_transition(self, ct_array, ct_spacing):
-        """Transition region should have intermediate values."""
+        """Soft tissue voxels just outside bone should have intermediate weight."""
         mask = compute_bone_mask(ct_array)
         config = DeformationConfig(transition_width_mm=4.0)
         weight = compute_tissue_weight(mask, ct_spacing, config)
-        # At the boundary of bone (around index 4-5), values should be intermediate
-        boundary_values = weight[4, 4, 4]
+        # Bone voxels are always exactly 0 after the hard-set
+        assert weight[4, 4, 4] == 0.0
+        # Soft tissue 1 voxel outside the bone block should be intermediate
+        boundary_values = weight[5, 5, 5]
         assert 0.1 < boundary_values < 0.95
 
     def test_shape_and_dtype(self, ct_array, ct_spacing):

@@ -64,4 +64,9 @@ def compute_tissue_weight(
         bone_mask.astype(np.float32), sigma=sigma_voxels, mode="nearest",
     )
     weight = 1.0 - smoothed
+    # Hard-set all actual bone voxels to 0 regardless of bone thickness.
+    # Without this, thin cortical bone (1-2 voxels) is barely suppressed by
+    # the Gaussian (smoothed ≈ 0.1-0.2 for a 1-voxel sliver at sigma≈3),
+    # leaving tissue_weight ≈ 0.8 and passing most of the displacement through.
+    weight[bone_mask] = 0.0
     return np.clip(weight, 0.0, 1.0).astype(np.float32)
