@@ -190,6 +190,7 @@ class EnsembleManifestEntry:
     dvf_path: str
     deformed_series_instance_uid: str
     source_ct_series_instance_uid: str
+    rtstruct_path: str = ""   # relative path to deformed RTSTRUCT, empty if not generated
 
     def to_dict(self) -> dict[str, Any]:
         """Serialise to a plain dict suitable for JSON encoding."""
@@ -208,4 +209,5 @@ class EnsembleManifestEntry:
             "dvf_path": self.dvf_path,
             "deformed_series_instance_uid": self.deformed_series_instance_uid,
             "source_ct_series_instance_uid": self.source_ct_series_instance_uid,
+            "rtstruct_path": self.rtstruct_path,
         }

@@ -7,7 +7,8 @@ Usage::
         --motion exampledata/motion_063/MotionData_fraction01.xml \\
         --out runs/063_fx01/ \\
         --n-states 20 \\
-        [--rtstruct RS.dcm] \\
+        [--rtstruct RS.dcm] \
+        [--deform-rtstruct RS.dcm] \\
         [--ctv-roi CTV_Prostate] \\
         [--falloff 25] \\
         [--bone-threshold 300] \\
@@ -55,6 +56,15 @@ def _build_parser() -> argparse.ArgumentParser:
     p.add_argument(
         "--rtstruct", default=None, metavar="FILE",
         help="RTSTRUCT DICOM for CTV localisation.  If omitted, no CTV falloff.",
+    )
+    p.add_argument(
+        "--deform-rtstruct", default=None, metavar="FILE",
+        dest="deform_rtstruct",
+        help=(
+            "RTSTRUCT DICOM to deform alongside each CT state.  "
+            "Produces state_{i:03d}_rs.dcm per state in --out.  "
+            "May be the same file as --rtstruct."
+        ),
     )
     p.add_argument(
         "--ctv-roi", default=None, metavar="NAME",
@@ -165,6 +175,7 @@ def main(argv: list[str] | None = None) -> int:
             out_dir=args.out,
             config=config,
             rtstruct_path=args.rtstruct,
+            deform_rtstruct_path=args.deform_rtstruct,
             n_states=args.n_states,
             rotation_weight_mm_per_deg=args.rotation_weight,
             seed=args.seed,
@@ -174,9 +185,10 @@ def main(argv: list[str] | None = None) -> int:
         return 1
 
     n = len(manifest.get("states", []))
+    rs_msg = f", {n} deformed RTSTRUCTs" if args.deform_rtstruct else ""
     print(
         f"Done: {n} deformed CT states written to {args.out}  "
-        f"(manifest.json, {n} DVF .mha files, {n} DICOM CT series)"
+        f"(manifest.json, {n} DVF .mha files, {n} DICOM CT series{rs_msg})"
     )
     return 0
 

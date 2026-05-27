@@ -43,6 +43,7 @@ from gendosecalc.deform.models import (
 )
 from gendosecalc.deform.motion_io import load_motion_csv, load_synchrony_xml
 from gendosecalc.deform.motion_select import select_representative_states
+from gendosecalc.deform.rtstruct_deform import deform_rtstruct
 from gendosecalc.deform.structures import load_ctv_mask
 
 logger = logging.getLogger(__name__)
@@ -82,6 +83,7 @@ def generate_ensemble(
     out_dir: str | Path,
     config: DeformationConfig | None = None,
     rtstruct_path: str | Path | None = None,
+    deform_rtstruct_path: str | Path | None = None,
     n_states: int | None = None,
     rotation_weight_mm_per_deg: float | None = None,
     seed: int = 0,
@@ -96,6 +98,10 @@ def generate_ensemble(
         config: Deformation configuration.  Defaults to ``DeformationConfig()``.
         rtstruct_path: Path to RTSTRUCT DICOM.  If ``None``, the full rigid
             DVF (centred on image centre) is used without CTV localisation.
+        deform_rtstruct_path: If provided, the RTSTRUCT at this path is
+            deformed alongside each CT state and saved as
+            ``state_{i:03d}_rs.dcm`` in ``out_dir``.  May be the same file
+            as ``rtstruct_path``.
         n_states: Number of representative states.  Overrides ``config.n_states``
             if supplied.
         rotation_weight_mm_per_deg: Override ``config.rotation_weight_mm_per_deg``.
@@ -115,6 +121,8 @@ def generate_ensemble(
     motion_path = Path(motion_path)
     out_dir = Path(out_dir)
     out_dir.mkdir(parents=True, exist_ok=True)
+
+    deform_rs = Path(deform_rtstruct_path) if deform_rtstruct_path else None
 
     # -------------------------------------------------------------------------
     # 1. Load reference CT
@@ -254,6 +262,28 @@ def generate_ensemble(
             source_series_uid=source_series_uid,
         )
 
+        # --- Deform RTSTRUCT (optional) ---
+        rs_rel_path = ""
+        if deform_rs is not None:
+            rs_filename = f"state_{i:03d}_rs.dcm"
+            rs_out_path = out_dir / rs_filename
+            try:
+                deform_rtstruct(
+                    rtstruct_path=deform_rs,
+                    dvf=dvf,
+                    out_path=rs_out_path,
+                    state_index=i,
+                    epoch_ms=epoch_ms,
+                    source_series_uid=source_series_uid,
+                    deformed_series_uid=new_series_uid,
+                    config=config,
+                )
+                rs_rel_path = rs_filename
+            except Exception as exc:
+                logger.error(
+                    "Failed to deform RTSTRUCT for state %03d: %s", i, exc, exc_info=True
+                )
+
         entry = EnsembleManifestEntry(
             state_index=i,
             epoch_ms=epoch_ms,
@@ -269,6 +299,7 @@ def generate_ensemble(
             dvf_path=dvf_filename,
             deformed_series_instance_uid=new_series_uid,
             source_ct_series_instance_uid=source_series_uid,
+            rtstruct_path=rs_rel_path,
         )
         manifest_entries.append(entry.to_dict())
 
@@ -282,6 +313,7 @@ def generate_ensemble(
         "source_ct_series_instance_uid": source_series_uid,
         "motion_path": str(motion_path),
         "rtstruct_path": str(rtstruct_path) if rtstruct_path else None,
+        "deform_rtstruct_path": str(deform_rs) if deform_rs else None,
         "n_states": n_states_eff,
         "total_samples": len(samples),
         "k_medoids_cost": selection.total_cost,

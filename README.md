@@ -161,7 +161,7 @@ pytest tests/deform/ -v
 - **Phase 4** — Pipeline integration (`--deform-ct` flag, DICOM export)
 - **Phase 5** — Validation and refinement
 
-See [plan_deform.md](plan_deform.md) for full specification.
+See [plan_deform.md](plan_deform.md) for full specification and [HOWTO.md](HOWTO.md) for an end-to-end usage guide.
 
 ---
 

@@ -24,6 +24,7 @@ from gendosecalc.deform.dvf_generate import (
 from gendosecalc.deform.motion_io import load_synchrony_xml, load_motion_csv
 from gendosecalc.deform.motion_select import select_representative_states
 from gendosecalc.deform.structures import load_ctv_mask
+from gendosecalc.deform.rtstruct_deform import deform_rtstruct
 from gendosecalc.deform.pipeline import generate_ensemble
 
 __all__ = [
@@ -57,6 +58,8 @@ __all__ = [
     "select_representative_states",
     # Structures
     "load_ctv_mask",
+    # RTSTRUCT deformation
+    "deform_rtstruct",
     # Pipeline
     "generate_ensemble",
 ]

@@ -192,7 +192,7 @@ class TestSaveCtSeries:
             cluster_weight=1,
         )
         dcm = pydicom.dcmread(str(list(tmp_path.glob("CT.*.dcm"))[0]))
-        arr = dcm.pixel_array.astype(np.int16)
+        arr = np.frombuffer(dcm.PixelData, dtype=np.int16).reshape(dcm.Rows, dcm.Columns)
         assert arr[8, 8] == 42
 
 

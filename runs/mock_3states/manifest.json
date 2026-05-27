@@ -1,0 +1,72 @@
+{
+  "engine_version": "0.1.0",
+  "created_at": "2026-05-27T13:50:12.980505+00:00",
+  "source_ct_dir": "exampledata/ct_rs_063",
+  "source_ct_series_instance_uid": "1.2.246.352.71.2.462050361922.13152930.20250522114657",
+  "motion_path": "exampledata/mock_motion_3states.csv",
+  "rtstruct_path": "exampledata/ct_rs_063/RS.1.2.246.352.71.4.462050361922.1174128.20250523115049.dcm",
+  "deform_rtstruct_path": "exampledata/ct_rs_063/RS.1.2.246.352.71.4.462050361922.1174128.20250523115049.dcm",
+  "n_states": 3,
+  "total_samples": 3,
+  "k_medoids_cost": 0.0,
+  "config": {
+    "bone_threshold_hu": 300.0,
+    "transition_width_mm": 3.0,
+    "falloff_mm": 25.0,
+    "interpolation": "linear",
+    "rotation_weight_mm_per_deg": 10.0
+  },
+  "states": [
+    {
+      "state_index": 0,
+      "epoch_ms": 0,
+      "iso_timestamp": "1970-01-01T00:00:00.000+00:00",
+      "cluster_weight": 1,
+      "tx_mm": 5.0,
+      "ty_mm": 0.0,
+      "tz_mm": 0.0,
+      "rx_deg": 0.0,
+      "ry_deg": 0.0,
+      "rz_deg": 0.0,
+      "ct_dir": "state_000_ct",
+      "dvf_path": "state_000_dvf.mha",
+      "deformed_series_instance_uid": "1.2.826.0.1.3680043.8.498.86747338762664531085619600459153503052",
+      "source_ct_series_instance_uid": "1.2.246.352.71.2.462050361922.13152930.20250522114657",
+      "rtstruct_path": "state_000_rs.dcm"
+    },
+    {
+      "state_index": 1,
+      "epoch_ms": 1000,
+      "iso_timestamp": "1970-01-01T00:00:01.000+00:00",
+      "cluster_weight": 1,
+      "tx_mm": 0.0,
+      "ty_mm": -5.0,
+      "tz_mm": 0.0,
+      "rx_deg": 0.0,
+      "ry_deg": 0.0,
+      "rz_deg": 0.0,
+      "ct_dir": "state_001_ct",
+      "dvf_path": "state_001_dvf.mha",
+      "deformed_series_instance_uid": "1.2.826.0.1.3680043.8.498.40823847716493711905392474242455316551",
+      "source_ct_series_instance_uid": "1.2.246.352.71.2.462050361922.13152930.20250522114657",
+      "rtstruct_path": "state_001_rs.dcm"
+    },
+    {
+      "state_index": 2,
+      "epoch_ms": 2000,
+      "iso_timestamp": "1970-01-01T00:00:02.000+00:00",
+      "cluster_weight": 1,
+      "tx_mm": 0.0,
+      "ty_mm": 0.0,
+      "tz_mm": 5.0,
+      "rx_deg": 0.0,
+      "ry_deg": 0.0,
+      "rz_deg": 0.0,
+      "ct_dir": "state_002_ct",
+      "dvf_path": "state_002_dvf.mha",
+      "deformed_series_instance_uid": "1.2.826.0.1.3680043.8.498.90242896860636101094266668880769371570",
+      "source_ct_series_instance_uid": "1.2.246.352.71.2.462050361922.13152930.20250522114657",
+      "rtstruct_path": "state_002_rs.dcm"
+    }
+  ]
+}
