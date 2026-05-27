@@ -1,9 +1,14 @@
 """Bone segmentation and tissue weight map via HU thresholding.
 
 Strategy:
-    1. Threshold CT at ``bone_threshold_hu`` → binary bone mask
-    2. Gaussian-smooth the mask with per-axis sigma = ``transition_width_mm / spacing_mm``
-    3. Invert to get tissue weight: ``1.0 − smoothed`` (0 in bone, 1 in soft tissue)
+    1. Threshold CT at ``bone_threshold_hu`` → binary bone mask (cortical bone)
+    2. Fill enclosed cavities per axial slice with ``binary_fill_holes`` to include
+       bone marrow (fatty marrow HU ≈ −100 to +100 is below the threshold but must
+       also be kept rigid so it doesn't get displaced into the cortical shell)
+    3. Gaussian-smooth the filled mask with sigma = ``transition_width_mm / spacing_mm``
+    4. Hard-set all actual bone voxels to weight=0, leaving a smooth 0→1 gradient
+       only in the soft tissue outside bone
+    5. Invert to get tissue weight: 0 in bone/marrow, 1 in soft tissue
 
 The tissue weight is used to attenuate DVF displacements so bone remains rigid.
 """
@@ -11,7 +16,7 @@ The tissue weight is used to attenuate DVF displacements so bone remains rigid.
 from __future__ import annotations
 
 import numpy as np
-from scipy.ndimage import gaussian_filter
+from scipy.ndimage import binary_fill_holes, gaussian_filter
 
 from gendosecalc.deform.models import DeformationConfig
 
@@ -28,11 +33,18 @@ def compute_bone_mask(
             Defaults to ``DeformationConfig()`` if not provided.
 
     Returns:
-        Boolean array ``(nz, ny, nx)`` — True where HU > threshold.
+        Boolean array ``(nz, ny, nx)`` — True where HU > threshold or inside a
+        closed cortical bone cavity (marrow).
     """
     if config is None:
         config = DeformationConfig()
-    return ct_array > config.bone_threshold_hu
+    mask = ct_array > config.bone_threshold_hu
+    # Fill bone marrow cavities: cortical bone forms a closed shell in axial
+    # slices; marrow inside is at soft-tissue HU but must move rigidly.
+    filled = np.zeros_like(mask)
+    for iz in range(mask.shape[0]):
+        filled[iz] = binary_fill_holes(mask[iz])
+    return filled
 
 
 def compute_tissue_weight(
